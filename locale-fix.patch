@@ -1,25 +1,25 @@
-diff --git a/Externals/libiconv-1.14/src/iconv.c b/Externals/libiconv-1.14/src/iconv.c
-index 825ef2229e..65d3a382b5 100644
---- a/Externals/libiconv-1.14/src/iconv.c
-+++ b/Externals/libiconv-1.14/src/iconv.c
-@@ -851,10 +851,18 @@ int main (int argc, char* argv[])
- #if HAVE_SETLOCALE
-   /* Needed for the locale dependent encodings, "char" and "wchar_t",
-      and for gettext. */
--  setlocale(LC_CTYPE,"");
-+  if (!setlocale(LC_CTYPE, "")) {
-+    /* Fallback to the "C" locale */
-+    fprintf(stderr, "Failed to set locale, falling back to C locale");
-+    setlocale(LC_CTYPE, "C");
+diff --git a/Source/Core/Common/StringUtil.cpp b/Source/Core/Common/StringUtil.cpp
+index 935db75d2f..ad5bf07405 100644
+--- a/Source/Core/Common/StringUtil.cpp
++++ b/Source/Core/Common/StringUtil.cpp
+@@ -487,6 +487,20 @@ std::string UTF16BEToUTF8(const char16_t* str, size_t max_size)
+ template <typename T>
+ std::string CodeTo(const char* tocode, const char* fromcode, std::basic_string_view<T> input)
+ {
++
++  char* locale_res = setlocale(LC_ALL, "");
++  if (!locale_res)
++  {
++    ERROR_LOG_FMT(COMMON,
++                  "setlocale(LC_ALL, \"\") failed [{}]: {}, falling back to C locale",
++                  fromcode, strerror(errno));
++    if (!setlocale(LC_ALL, "C"))
++    {
++        ERROR_LOG_FMT(COMMON,
++                      "setlocale(LC_ALL, \"C\") failed: {}",
++                      strerror(errno));
++    }
 +  }
- #if ENABLE_NLS
-   /* Needed for gettext. */
--  setlocale(LC_MESSAGES,"");
-+  if (!setlocale(LC_MESSAGES, "")) {
-+    /* Fallback to the "C" locale */
-+    fprintf(stderr, "Failed to set locale, falling back to C locale");
-+    setlocale(LC_MESSAGES, "C");
-+  }
- #endif
- #endif
- #if ENABLE_NLS
+   std::string result;
+ 
+   iconv_t const conv_desc = iconv_open(tocode, fromcode);
