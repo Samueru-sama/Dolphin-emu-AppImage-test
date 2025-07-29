@@ -1,0 +1,25 @@
+diff --git a/Externals/libiconv-1.14/src/iconv.c b/Externals/libiconv-1.14/src/iconv.c
+index 825ef2229e..65d3a382b5 100644
+--- a/Externals/libiconv-1.14/src/iconv.c
++++ b/Externals/libiconv-1.14/src/iconv.c
+@@ -851,10 +851,18 @@ int main (int argc, char* argv[])
+ #if HAVE_SETLOCALE
+   /* Needed for the locale dependent encodings, "char" and "wchar_t",
+      and for gettext. */
+-  setlocale(LC_CTYPE,"");
++  if (!setlocale(LC_CTYPE, "")) {
++    /* Fallback to the "C" locale */
++    fprintf(stderr, "Failed to set locale, falling back to C locale");
++    setlocale(LC_CTYPE, "C");
++  }
+ #if ENABLE_NLS
+   /* Needed for gettext. */
+-  setlocale(LC_MESSAGES,"");
++  if (!setlocale(LC_MESSAGES, "")) {
++    /* Fallback to the "C" locale */
++    fprintf(stderr, "Failed to set locale, falling back to C locale");
++    setlocale(LC_MESSAGES, "C");
++  }
+ #endif
+ #endif
+ #if ENABLE_NLS
