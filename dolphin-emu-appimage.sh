@@ -12,6 +12,7 @@ URUNTIME="https://github.com/VHSgunzo/uruntime/releases/latest/download/uruntime
 URUNTIME_LITE="https://github.com/VHSgunzo/uruntime/releases/latest/download/uruntime-appimage-dwarfs-lite-$ARCH"
 UPINFO="gh-releases-zsync|$(echo "$GITHUB_REPOSITORY" | tr '/' '|')|latest|*dwarfs-$ARCH.AppImage.zsync"
 REPO="https://github.com/dolphin-emu/dolphin.git"
+PATCH="$PWD"/locale-fix.patch
 
 # Determine to build nightly or stable
 if [ "$DEVEL" = 'true' ]; then
@@ -32,7 +33,8 @@ echo "$VERSION" > ~/version
 
 # BUILD DOLPHIN
 (
-	cd ./dolphin 
+	cd ./dolphin
+	patch -p1 -i "$PATCH"
 	mkdir ./build 
 	cd ./build
 
